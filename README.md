@@ -106,26 +106,59 @@ Diseñado específicamente para las demandas de un ministerio musical contempor�
 
 ---
 
+---
+
+## 🚀 Inicio Rápido desde Cero (Cualquier Iglesia o Usuario)
+
+Para desplegar EKKLESIA en tu congregación sin depender de servidores externos ni configuraciones previas:
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/HexMorningStar/EKKLESIA.git
+cd EKKLESIA
+
+# 2. Configurar variables de entorno (Opcional)
+cp .env.example .env.local
+# Si deseas búsqueda y extracción inteligente de acordes con IA, coloca tu clave de Gemini:
+# GEMINI_API_KEY=tu_clave_aqui
+
+# 3. Instalar dependencias
+npm install
+
+# 4. Iniciar el servidor local
+npm run dev
+# O para producción con alto rendimiento:
+# npm run build && npm start
+
+# 5. Abrir en el navegador
+# http://localhost:3000
+```
+
+> [!NOTE]
+> La base de datos SQLite se inicializa de forma automática en el primer arranque, limpia y vacía, lista para que comiences desde cero agregando las canciones y repertorios propios de tu ministerio. Si deseas canciones de prueba para familiarizarte con las herramientas, puedes pulsar **"Cargar 4 canciones de demostración"** en el catálogo.
+
+---
+
 ## 📲 Métodos de Instalación en el Celular / Tablet
 
 ### Método 1: APK Nativo para Android (`EKKLESIA.apk`)
 1. Descarga directa en el dispositivo:
-   - **En la computadora**: Copia [`/home/hex/Escritorio/EKKLESIA.apk`](file:///home/hex/Escritorio/EKKLESIA.apk) a tu teléfono vía cable USB, WhatsApp o Google Drive.
-   - **Desde el navegador del celular**: Abre la dirección de tu servidor o escanea el código QR en la aplicación y descarga el APK directamente.
-2. Abre el archivo descargado en tu celular y pulsa **Instalar** (permite "Instalar aplicaciones de fuentes desconocidas" en los ajustes de seguridad si el sistema lo solicita).
-3. Abre **EKKLESIA**: la app se abrirá en pantalla completa sin barras de navegador. Si estás en la misma red Wi-Fi del templo, detectará el servidor automáticamente.
+   - **Desde la web de la app**: Abre el menú de sincronización móvil en la barra superior o escanea el código QR en pantalla para descargar el APK directamente en el celular o tablet.
+   - **Vía USB o WhatsApp**: Transfiere el archivo `EKKLESIA.apk` generado en tu equipo a tu teléfono.
+2. Abre el archivo descargado en tu celular y pulsa **Instalar** (permite "Instalar aplicaciones de fuentes desconocidas" en los ajustes de seguridad si Android lo solicita).
+3. Abre **EKKLESIA**: en el primer inicio ingresa la URL o IP de tu servidor (ej: `http://192.168.1.100:3000` o `https://tu-dominio.com`). La app recordará la configuración y se conectará en pantalla completa con pantalla siempre activa (*wake-lock*).
 
 ### Método 2: Instalación Directa PWA (Sin Instalar APK)
-1. Conecta el celular a la red Wi-Fi del templo o abre la URL del servidor en **Google Chrome** o **Microsoft Edge**.
-2. Toca el menú de opciones (tres puntos verticales `⋮`) en la esquina superior derecha.
+1. Conecta el celular a la red Wi-Fi del templo o abre la URL del servidor en **Google Chrome**, **Samsung Internet** o **Safari**.
+2. Toca el menú de opciones (tres puntos verticales `⋮` o botón compartir en iOS).
 3. Selecciona **"Agregar a la pantalla principal"** o **"Instalar aplicación"**.
-4. ¡Listo! Se creará el ícono de **EKKLESIA** en el cajón de aplicaciones de tu celular con capacidades offline.
+4. ¡Listo! Se creará el ícono de **EKKLESIA** en el cajón de aplicaciones de tu celular con capacidades offline completas.
 
 ---
 
 ## 🛠️ Compilación del APK Nativo desde Código Fuente
 
-El código fuente nativo de Android se encuentra en el directorio [`android/`](file:///home/hex/Escritorio/Music/android).
+El código fuente nativo de Android se encuentra en el directorio [`android/`](android).
 
 ### Requisitos
 * JDK 17 o superior (`openjdk-17-jdk`)
@@ -143,9 +176,7 @@ cd android
 # android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-El script copia automáticamente el binario listo para distribución a:
-* `public/EKKLESIA.apk` (para descarga vía código QR desde la web)
-* `~/Escritorio/EKKLESIA.apk` (para respaldo en tu escritorio)
+El binario compilado puede copiarse a `public/EKKLESIA.apk` para permitir su descarga directa vía navegador o código QR desde la propia aplicación.
 
 ---
 
@@ -155,13 +186,14 @@ Para que los celulares y tablets de los músicos se sincronicen con la computado
 
 1. **Conexión por Red Wi-Fi Local (Recomendado para Latencia Cero)**:
    - Conecta la computadora del servidor y los celulares de los músicos a la misma red Wi-Fi del templo.
-   - Abre en los celulares la IP local del servidor: `http://192.168.X.X:3000`.
-2. **Conexión Remota / Datos Móviles (Túnel Cloudflare)**:
-   - Si no hay router en el lugar, activa el túnel seguro:
+   - Consulta la IP local de la computadora servidora (`ip a` en Linux/Mac o `ipconfig` en Windows, ej: `192.168.1.50`).
+   - Abre en los celulares del atril: `http://TU_IP_LOCAL:3000`.
+2. **Conexión Remota / Datos Móviles (Túnel Cloudflare o Nube)**:
+   - Si no dispones de un router en el lugar o los músicos utilizan datos móviles 4G/5G, puedes exponer el servidor con un túnel seguro:
      ```bash
      cloudflared tunnel --url http://localhost:3000
      ```
-   - Los músicos pueden ingresar escaneando el código QR generado sin importar si están usando datos móviles 4G/5G.
+   - Los músicos pueden ingresar mediante la URL HTTPS generada o escaneando el código QR en pantalla.
 
 ---
 

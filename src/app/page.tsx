@@ -178,6 +178,9 @@ export default function HomePage() {
                 await Promise.all([loadSongs(), loadArtists()]);
                 if (selectedSong?.id === id) setSelectedSong(null);
               }}
+              onRefreshSongs={async () => {
+                await Promise.all([loadSongs(), loadArtists()]);
+              }}
             />
           )
         ) : activeTab === 'setlists' ? (
@@ -252,8 +255,6 @@ export default function HomePage() {
       <AndroidSyncModal
         isOpen={isAndroidSyncOpen}
         onClose={() => setIsAndroidSyncOpen(false)}
-        serverUrl="http://192.168.0.15:3000"
-        tunnelUrl="https://nascar-techniques-tennessee-sanyo.trycloudflare.com"
       />
 
       {/* Modal Afinador Cromático Digital */}

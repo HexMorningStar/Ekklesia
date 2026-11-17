@@ -13,9 +13,17 @@ dist/
 .env*.local
 .env
 
-# SQLite temporales
+# SQLite y almacenamiento local
+*.db
+*.db-journal
 *.db-shm
 *.db-wal
+church-music.db
+
+# Subidas de usuario
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/sheet-music/.gitkeep
 
 # Logs
 npm-debug.log*

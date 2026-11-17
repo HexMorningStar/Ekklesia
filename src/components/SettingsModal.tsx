@@ -59,14 +59,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Wifi className="h-4 w-4 text-amber-500" />
-                <span className="font-bold text-slate-900 dark:text-white">Servidor Local de la Iglesia</span>
+                <span className="font-bold text-slate-900 dark:text-white">Servidor Activo</span>
               </div>
               <span className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400">
-                192.168.0.15:3000
+                {typeof window !== 'undefined' ? window.location.host : 'localhost:3000'}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              Emisión activa en la red Wi-Fi local. Los teléfonos y tablets con la app Android EKKLESIA se sincronizan automáticamente sin requerir conexión a internet.
+              Emisión activa en la red. Los teléfonos y tablets con la app Android EKKLESIA se sincronizan automáticamente con este host sin requerir internet externo.
             </p>
           </div>
 

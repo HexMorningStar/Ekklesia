@@ -341,6 +341,15 @@ export default function SetlistManager({
 
         {/* Lista con scroll de setlists */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+          {setlists.length === 0 && !isCreatingSetlist && (
+            <div className="p-8 text-center text-xs text-slate-400">
+              <Calendar className="h-8 w-8 text-slate-500 mx-auto mb-2 opacity-50" />
+              <p className="font-semibold text-slate-700 dark:text-slate-300">No hay repertorios creados.</p>
+              <p className="mt-1 text-slate-500 text-[11px]">
+                Pulsa &quot;+ Nuevo Setlist&quot; para programar el culto o ensayo.
+              </p>
+            </div>
+          )}
           {setlists.map((s) => {
             const isSelected = selectedSetlistId === s.id;
             return (

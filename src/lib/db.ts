@@ -135,7 +135,13 @@ function seedInitialData(db: Database.Database) {
 
   insertManyVerses(FAMOUS_PASSAGES);
 
-  // 3. Sembrar artistas y canciones cristianas de ejemplo
+  // 3. Sembrar artistas y canciones de demostración (sólo si SEED_DEMO_DATA está activo)
+  if (process.env.SEED_DEMO_DATA === 'true') {
+    seedDemoData(db);
+  }
+}
+
+export function seedDemoData(db: Database.Database) {
   const checkArtists = db.prepare('SELECT COUNT(*) as count FROM artists').get() as { count: number };
   if (checkArtists.count === 0) {
     const insertArtist = db.prepare('INSERT INTO artists (name, bio) VALUES (?, ?)');

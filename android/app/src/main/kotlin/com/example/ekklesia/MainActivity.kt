@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
   companion object {
     const val PREFS_NAME = "ekklesia_prefs"
     const val KEY_SERVER_URL = "server_url"
-    const val DEFAULT_SERVER_URL = "http://192.168.0.15:3000"
+    const val DEFAULT_SERVER_URL = "http://10.0.2.2:3000"
   }
 
   private var webView: WebView? = null
@@ -72,8 +72,11 @@ class MainActivity : ComponentActivity() {
           modifier = Modifier.fillMaxSize(),
           color = Color(0xFF0F172A)
         ) {
+          val savedUrl = prefs.getString(KEY_SERVER_URL, null)
+          val isFirstLaunch = savedUrl == null
           EkklesiaScreen(
-            initialUrl = prefs.getString(KEY_SERVER_URL, DEFAULT_SERVER_URL) ?: DEFAULT_SERVER_URL,
+            initialUrl = savedUrl ?: DEFAULT_SERVER_URL,
+            initialShowConfig = isFirstLaunch,
             onSaveUrl = { newUrl ->
               prefs.edit().putString(KEY_SERVER_URL, newUrl).apply()
             },
@@ -125,11 +128,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun EkklesiaScreen(
   initialUrl: String,
+  initialShowConfig: Boolean = false,
   onSaveUrl: (String) -> Unit,
   onAttachWebView: (WebView) -> Unit
 ) {
   var serverUrl by remember { mutableStateOf(initialUrl) }
-  var isConfigDialogOpen by remember { mutableStateOf(false) }
+  var isConfigDialogOpen by remember { mutableStateOf(initialShowConfig) }
   var hasLoadError by remember { mutableStateOf(false) }
   var errorMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(true) }
@@ -312,7 +316,7 @@ fun EkklesiaScreen(
         text = {
           Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-              "Ingresa la dirección IP que muestra la app en la laptop servidora (ej: http://192.168.0.15:3000):",
+              "Ingresa la dirección IP o dominio de tu servidor EKKLESIA (ej: http://192.168.1.100:3000 o https://mi-iglesia.com):",
               fontSize = 12.sp,
               color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -331,7 +335,7 @@ fun EkklesiaScreen(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp)
               ) {
-                Text("IP Actual (192.168.0.15)", fontSize = 10.sp)
+                Text("Emulador Android (10.0.2.2:3000)", fontSize = 10.sp)
               }
             }
           }
