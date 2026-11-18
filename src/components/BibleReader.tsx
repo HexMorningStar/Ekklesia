@@ -33,6 +33,7 @@ import {
 import { BIBLE_BOOKS, BibleBook, findBookByName, parseBibleCitation } from '@/lib/bible-data';
 import { BIBLE_READING_PLANS, ReadingPlan, ReadingPlanDay } from '@/lib/bible-plans';
 import { LITURGICAL_MOMENTS, HEBREW_WORSHIP_TERMS, LiturgicalMoment, HebrewWorshipTerm } from '@/lib/bible-terms';
+import { dbGetBibleChapter, dbSearchBible } from '@/lib/local-db';
 
 interface BibleReaderProps {
   onSelectPassageForSong?: (reference: string) => void;
@@ -104,6 +105,19 @@ export default function BibleReader({ onSelectPassageForSong }: BibleReaderProps
     async function loadChapter() {
       setIsLoadingChapter(true);
       try {
+        // 1. Probar primero el almacenamiento local en el dispositivo (IndexedDB)
+        const local = await dbGetBibleChapter(selectedBook.name, selectedChapter);
+        if (local && local.verses && local.verses.length > 0) {
+          setChapterData({
+            verses: local.verses,
+            crossRefs: local.crossRefs || [],
+            connectedSongs: []
+          });
+          setIsLoadingChapter(false);
+          return;
+        }
+
+        // 2. Si no está en local, consultar API si existe
         const res = await fetch(`/api/bible?type=chapter&book=${encodeURIComponent(selectedBook.name)}&chapter=${selectedChapter}`);
         const data = await res.json();
         if (data.success) {
@@ -131,6 +145,14 @@ export default function BibleReader({ onSelectPassageForSong }: BibleReaderProps
     setIsSearching(true);
     setSearchExecuted(true);
     try {
+      // 1. Probar búsqueda en local primero
+      const localResults = await dbSearchBible(searchQuery.trim());
+      if (localResults && localResults.length > 0) {
+        setSearchResults(localResults);
+        setIsSearching(false);
+        return;
+      }
+
       const res = await fetch(`/api/bible?type=search&q=${encodeURIComponent(searchQuery.trim())}`);
       const data = await res.json();
       if (data.success) {

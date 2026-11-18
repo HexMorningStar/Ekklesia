@@ -53,6 +53,8 @@ import InstrumentTunerModal from './InstrumentTunerModal';
 import GuitarTabViewer from './GuitarTabViewer';
 import MultitrackPlayerModal from './MultitrackPlayerModal';
 import SongTransitionModal from './SongTransitionModal';
+import RehearsalSyncModal from './RehearsalSyncModal';
+import { getP2PSyncEngine } from '@/lib/p2p-sync-engine';
 
 interface LiveStageModeProps {
   songs: any[];
@@ -86,6 +88,7 @@ export default function LiveStageMode({
   const [isGuitarTabOpen, setIsGuitarTabOpen] = useState<boolean>(false);
   const [isMultitrackOpen, setIsMultitrackOpen] = useState<boolean>(false);
   const [isTransitionOpen, setIsTransitionOpen] = useState<boolean>(false);
+  const [isRehearsalModalOpen, setIsRehearsalModalOpen] = useState<boolean>(false);
 
   // Sistema de Dirección en Vivo (Director vs Músico)
   const [stageRole, setStageRole] = useState<'director' | 'musician'>('director');
@@ -450,6 +453,16 @@ export default function LiveStageMode({
         scrollToSection(normalizedSection);
       }
 
+      // Transmitir inmediatamente vía motor P2P descentralizado
+      getP2PSyncEngine().broadcastAction({
+        songId: currentSong?.id,
+        songTitle: currentSong?.title,
+        songIndex: currentIndex,
+        activeSection: normalizedSection,
+        cueType,
+        cueMessage: message
+      });
+
       await fetch('/api/live-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -462,7 +475,7 @@ export default function LiveStageMode({
           cueMessage: message,
           directorName: 'Director de Alabanza'
         })
-      });
+      }).catch(() => {});
     } catch (err) {
       console.error('Error broadcasting stage cue:', err);
     }
@@ -528,6 +541,43 @@ export default function LiveStageMode({
     };
   }, [lastSyncedTimestamp, stageRole, autoFollowSong, currentIndex, songs]);
 
+  // Suscripción al Motor P2P Descentralizado (BroadcastChannel / Storage / P2P Mesh)
+  useEffect(() => {
+    const syncEngine = getP2PSyncEngine();
+    const unsubscribe = syncEngine.subscribe((state) => {
+      if (stageRole === 'musician' && state.timestamp) {
+        if (state.cueMessage || state.activeSection) {
+          setActiveDirectorCue({
+            message: state.cueMessage || `¡Vamos a ${state.activeSection}!`,
+            type: state.cueType || 'section',
+            timestamp: state.timestamp,
+            section: state.activeSection
+          });
+
+          if (state.activeSection) {
+            setActiveBroadcastSection(state.activeSection);
+            scrollToSection(state.activeSection);
+          }
+
+          if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+            try { navigator.vibrate([140, 70, 140]); } catch (e) {}
+          }
+        }
+
+        if (
+          autoFollowSong &&
+          typeof state.songIndex === 'number' &&
+          state.songIndex !== currentIndex &&
+          songs[state.songIndex]
+        ) {
+          setCurrentIndex(state.songIndex);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [stageRole, autoFollowSong, currentIndex, songs]);
+
   // Auto-ocultar el banner flotante HUD del director después de 7 segundos
   useEffect(() => {
     if (activeDirectorCue) {
@@ -569,31 +619,25 @@ export default function LiveStageMode({
               <span>Volver</span>
             </button>
 
-            {/* Selector de Rol Director / Músico */}
+            {/* Selector de Rol Director / Músico y Sala P2P */}
             <button
-              onClick={() => {
-                const nextRole = stageRole === 'director' ? 'musician' : 'director';
-                setStageRole(nextRole);
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('ekklesia_stage_role', nextRole);
-                }
-              }}
+              onClick={() => setIsRehearsalModalOpen(true)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition border shadow-sm shrink-0 ${
                 stageRole === 'director'
                   ? 'bg-amber-500 text-slate-950 border-amber-400'
-                  : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'
+                  : 'bg-emerald-600/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30'
               }`}
-              title="Cambiar entre modo Director y modo Músico"
+              title="Abrir sala de ensayo P2P y código QR"
             >
               {stageRole === 'director' ? (
                 <>
                   <Crown className="h-3.5 w-3.5 stroke-[2.5]" />
-                  <span className="hidden sm:inline">Director</span>
+                  <span className="hidden sm:inline">Director (QR)</span>
                 </>
               ) : (
                 <>
                   <Users className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Músico</span>
+                  <span className="hidden sm:inline">Músico (P2P)</span>
                 </>
               )}
             </button>
@@ -1429,6 +1473,15 @@ export default function LiveStageMode({
         songs={songs}
         initialSourceSong={currentSong}
         initialTargetSong={songs[currentIndex + 1]}
+      />
+
+      {/* Modal de Sincronización P2P para Ensayos y Dirección */}
+      <RehearsalSyncModal
+        isOpen={isRehearsalModalOpen}
+        onClose={() => setIsRehearsalModalOpen(false)}
+        onRoleChanged={(newRole) => setStageRole(newRole === 'director' ? 'director' : 'musician')}
+        currentSetlist={songs}
+        currentSongTitle={currentSong?.title}
       />
 
       {/* Botón flotante accesible de regreso rápido en móvil */}

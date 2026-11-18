@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, Save, Music, BookOpen, Clock, FileText } from 'lucide-react';
 import { CHROMATIC_SHARPS, NOTE_TO_SOLFA } from '@/lib/chord-engine';
+import { saveSong } from '@/lib/data-repository';
 
 interface SongEditorProps {
   isOpen: boolean;
@@ -74,29 +75,20 @@ export default function SongEditor({
 
     try {
       const isEditing = !!song?.id;
-      const url = isEditing ? `/api/songs/${song.id}` : '/api/songs';
-      const method = isEditing ? 'PUT' : 'POST';
+      const songPayload = {
+        ...(isEditing ? { id: Number(song.id) } : {}),
+        title: title.trim(),
+        artist_name: artistName.trim() || 'Artista de Alabanza',
+        original_key: originalKey,
+        tempo: Number(tempo) || 72,
+        time_signature: timeSignature,
+        content: content.trim(),
+        scripture_reference: scriptureReference.trim(),
+        notes: notes.trim(),
+        sheet_music_url: sheetMusicUrl.trim() || null
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title.trim(),
-          artistName: artistName.trim() || 'Artista de Alabanza',
-          originalKey,
-          tempo: Number(tempo) || 72,
-          timeSignature,
-          content: content.trim(),
-          scriptureReference: scriptureReference.trim(),
-          notes: notes.trim(),
-          sheetMusicUrl: sheetMusicUrl.trim() || null
-        })
-      });
-
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Error al guardar');
-      }
+      await saveSong(songPayload);
 
       onSaved();
       onClose();

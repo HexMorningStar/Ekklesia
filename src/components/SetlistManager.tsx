@@ -27,6 +27,7 @@ import { analyzeHarmonicTransition } from '@/lib/harmonic-transitions';
 import TeamRosterModal from './TeamRosterModal';
 import ProjectionModal from './ProjectionModal';
 import SongTransitionModal from './SongTransitionModal';
+import { fetchSetlists, fetchSetlistById, saveSetlist, deleteSetlist } from '@/lib/data-repository';
 
 interface SetlistManagerProps {
   onLaunchLiveStage: (setlistSongs: any[], setlistTitle: string) => void;
@@ -65,13 +66,10 @@ export default function SetlistManager({
   const loadSetlists = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/setlists');
-      const data = await res.json();
-      if (data.success) {
-        setSetlists(data.setlists || []);
-        if (data.setlists.length > 0 && !selectedSetlistId) {
-          setSelectedSetlistId(data.setlists[0].id);
-        }
+      const list = await fetchSetlists();
+      setSetlists(list || []);
+      if (list && list.length > 0 && !selectedSetlistId) {
+        setSelectedSetlistId(list[0].id);
       }
     } catch (e) {
       console.error('Error cargando setlists:', e);
@@ -87,16 +85,13 @@ export default function SetlistManager({
   // Cargar detalle del setlist seleccionado
   useEffect(() => {
     if (!selectedSetlistId) return;
+    const idToFetch = selectedSetlistId;
 
     async function loadSetlistDetail() {
       try {
-        const res = await fetch(`/api/setlists/${selectedSetlistId}`);
-        const data = await res.json();
-        if (data.success) {
-          setActiveSetlistDetail({
-            ...data.setlist,
-            items: data.items || []
-          });
+        const detail = await fetchSetlistById(idToFetch);
+        if (detail) {
+          setActiveSetlistDetail(detail);
         }
       } catch (e) {
         console.error('Error cargando detalle de setlist:', e);
@@ -112,27 +107,34 @@ export default function SetlistManager({
     if (!newTitle.trim()) return;
 
     try {
-      const res = await fetch('/api/setlists', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: newTitle.trim(),
-          description: newDescription.trim(),
-          eventDate: newEventDate,
-          serviceType: newServiceType
-        })
+      const created = await saveSetlist({
+        title: newTitle.trim(),
+        description: newDescription.trim(),
+        event_date: newEventDate,
+        service_type: newServiceType,
+        items: []
       });
 
-      const data = await res.json();
-      if (data.success) {
-        setIsCreatingSetlist(false);
-        setNewTitle('');
-        setNewDescription('');
-        await loadSetlists();
-        setSelectedSetlistId(data.setlistId);
+      setIsCreatingSetlist(false);
+      setNewTitle('');
+      setNewDescription('');
+      await loadSetlists();
+      if (created?.id) {
+        setSelectedSetlistId(created.id);
       }
     } catch (e) {
       console.error('Error creando setlist:', e);
+    }
+  };
+
+  const persistItems = async (items: any[]) => {
+    if (!activeSetlistDetail || !selectedSetlistId) return;
+    const updated = { ...activeSetlistDetail, items };
+    setActiveSetlistDetail(updated);
+    try {
+      await saveSetlist(updated);
+    } catch (e) {
+      console.error('Error guardando items de setlist:', e);
     }
   };
 
@@ -141,25 +143,13 @@ export default function SetlistManager({
     if (!activeSetlistDetail?.items) return;
     const items = [...activeSetlistDetail.items];
     const targetIdx = direction === 'up' ? index - 1 : index + 1;
-
     if (targetIdx < 0 || targetIdx >= items.length) return;
 
     const temp = items[index];
     items[index] = items[targetIdx];
     items[targetIdx] = temp;
 
-    // Actualizar localmente y persistir
-    setActiveSetlistDetail({ ...activeSetlistDetail, items });
-
-    try {
-      await fetch(`/api/setlists/${selectedSetlistId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
-      });
-    } catch (e) {
-      console.error('Error actualizando orden:', e);
-    }
+    await persistItems(items);
   };
 
   // Cambiar tono elegido para la canción en este evento
@@ -168,17 +158,7 @@ export default function SetlistManager({
     const items = [...activeSetlistDetail.items];
     items[itemIndex].chosen_key = newKey;
 
-    setActiveSetlistDetail({ ...activeSetlistDetail, items });
-
-    try {
-      await fetch(`/api/setlists/${selectedSetlistId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
-      });
-    } catch (e) {
-      console.error('Error actualizando tono de canción:', e);
-    }
+    await persistItems(items);
   };
 
   // Cambiar notas de ensayo para la canción
@@ -187,17 +167,7 @@ export default function SetlistManager({
     const items = [...activeSetlistDetail.items];
     items[itemIndex].performance_notes = notes;
 
-    setActiveSetlistDetail({ ...activeSetlistDetail, items });
-
-    try {
-      await fetch(`/api/setlists/${selectedSetlistId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
-      });
-    } catch (e) {
-      console.error('Error guardando notas:', e);
-    }
+    await persistItems(items);
   };
 
   // Eliminar canción del setlist
@@ -205,18 +175,8 @@ export default function SetlistManager({
     if (!activeSetlistDetail?.items) return;
     const items = activeSetlistDetail.items.filter((_: any, idx: number) => idx !== itemIndex);
 
-    setActiveSetlistDetail({ ...activeSetlistDetail, items });
-
-    try {
-      await fetch(`/api/setlists/${selectedSetlistId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
-      });
-      loadSetlists();
-    } catch (e) {
-      console.error('Error eliminando item:', e);
-    }
+    await persistItems(items);
+    loadSetlists();
   };
 
   // Agregar canción al setlist
@@ -238,26 +198,16 @@ export default function SetlistManager({
     };
 
     items.push(newItem);
-    setActiveSetlistDetail({ ...activeSetlistDetail, items });
     setIsAddingSongModal(false);
-
-    try {
-      await fetch(`/api/setlists/${selectedSetlistId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
-      });
-      loadSetlists();
-    } catch (e) {
-      console.error('Error agregando canción a setlist:', e);
-    }
+    await persistItems(items);
+    loadSetlists();
   };
 
   // Eliminar setlist completo
   const handleDeleteSetlist = async (id: number) => {
     if (!confirm('¿Estás seguro de eliminar este setlist de ensayo?')) return;
     try {
-      await fetch(`/api/setlists/${id}`, { method: 'DELETE' });
+      await deleteSetlist(id);
       setSelectedSetlistId(null);
       setActiveSetlistDetail(null);
       await loadSetlists();

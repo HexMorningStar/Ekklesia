@@ -14,6 +14,7 @@ import {
   Layers,
   ChevronRight
 } from 'lucide-react';
+import { seedDemoData } from '@/lib/data-repository';
 
 interface SongCatalogProps {
   songs: any[];
@@ -43,8 +44,9 @@ export default function SongCatalog({
   const handleLoadDemo = async () => {
     setIsSeeding(true);
     try {
-      const res = await fetch('/api/seed-demo', { method: 'POST' });
-      if (res.ok && onRefreshSongs) {
+      await seedDemoData();
+      fetch('/api/seed-demo', { method: 'POST' }).catch(() => {});
+      if (onRefreshSongs) {
         onRefreshSongs();
       }
     } catch (e) {

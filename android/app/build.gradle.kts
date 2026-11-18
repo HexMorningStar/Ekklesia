@@ -52,6 +52,7 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
+  implementation("androidx.webkit:webkit:1.12.0")
 
   // Arch Components
   implementation(libs.androidx.lifecycle.runtime.compose)

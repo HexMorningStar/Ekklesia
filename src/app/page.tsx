@@ -22,7 +22,9 @@ import ProjectionModal from '@/components/ProjectionModal';
 import MultitrackPlayerModal from '@/components/MultitrackPlayerModal';
 import SongTransitionModal from '@/components/SongTransitionModal';
 import GuitarTabViewer from '@/components/GuitarTabViewer';
+import RehearsalSyncModal from '@/components/RehearsalSyncModal';
 import { NotationType } from '@/lib/chord-engine';
+import { fetchSongs, fetchArtists, deleteSong, saveSong } from '@/lib/data-repository';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('songs');
@@ -38,6 +40,7 @@ export default function HomePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isHarmonicCircleOpen, setIsHarmonicCircleOpen] = useState<boolean>(false);
   const [isAndroidSyncOpen, setIsAndroidSyncOpen] = useState<boolean>(false);
+  const [isRehearsalSyncOpen, setIsRehearsalSyncOpen] = useState<boolean>(false);
   const [isTunerOpen, setIsTunerOpen] = useState<boolean>(false);
   const [isRecommendationsOpen, setIsRecommendationsOpen] = useState<boolean>(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState<boolean>(false);
@@ -55,11 +58,8 @@ export default function HomePage() {
   // Cargar datos
   const loadSongs = async () => {
     try {
-      const res = await fetch('/api/songs');
-      const data = await res.json();
-      if (data.success) {
-        setSongs(data.songs || []);
-      }
+      const list = await fetchSongs();
+      setSongs(list || []);
     } catch (e) {
       console.error('Error cargando canciones:', e);
     }
@@ -67,11 +67,8 @@ export default function HomePage() {
 
   const loadArtists = async () => {
     try {
-      const res = await fetch('/api/artists');
-      const data = await res.json();
-      if (data.success) {
-        setArtists(data.artists || []);
-      }
+      const list = await fetchArtists();
+      setArtists(list || []);
     } catch (e) {
       console.error('Error cargando artistas:', e);
     }
@@ -133,6 +130,7 @@ export default function HomePage() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenHarmonicCircle={() => setIsHarmonicCircleOpen(true)}
         onOpenAndroidSync={() => setIsAndroidSyncOpen(true)}
+        onOpenRehearsalSync={() => setIsRehearsalSyncOpen(true)}
         onOpenTuner={() => setIsTunerOpen(true)}
         onOpenRecommendations={() => setIsRecommendationsOpen(true)}
         onOpenAnalytics={() => setIsAnalyticsOpen(true)}
@@ -174,7 +172,7 @@ export default function HomePage() {
               }}
               onOpenGeminiSearch={() => setIsGeminiModalOpen(true)}
               onDeleteSong={async (id) => {
-                await fetch(`/api/songs/${id}`, { method: 'DELETE' });
+                await deleteSong(id);
                 await Promise.all([loadSongs(), loadArtists()]);
                 if (selectedSong?.id === id) setSelectedSong(null);
               }}
@@ -255,6 +253,14 @@ export default function HomePage() {
       <AndroidSyncModal
         isOpen={isAndroidSyncOpen}
         onClose={() => setIsAndroidSyncOpen(false)}
+      />
+
+      {/* Modal Sincronización P2P Banda y Director */}
+      <RehearsalSyncModal
+        isOpen={isRehearsalSyncOpen}
+        onClose={() => setIsRehearsalSyncOpen(false)}
+        currentSetlist={songs}
+        currentSongTitle={selectedSong?.title}
       />
 
       {/* Modal Afinador Cromático Digital */}

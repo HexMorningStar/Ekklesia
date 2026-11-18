@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
 
+export function generateStaticParams() {
+  return [];
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   try {
     const { filename } = await params;

@@ -16,7 +16,9 @@ import {
   Guitar,
   BarChart3,
   Sliders,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Users,
+  Radio
 } from 'lucide-react';
 import { useTheme } from '@/lib/theme-context';
 
@@ -30,6 +32,7 @@ interface NavbarProps {
   onOpenSettings: () => void;
   onOpenHarmonicCircle: () => void;
   onOpenAndroidSync: () => void;
+  onOpenRehearsalSync?: () => void;
   onOpenTuner?: () => void;
   onOpenRecommendations?: () => void;
   onOpenAnalytics?: () => void;
@@ -47,6 +50,7 @@ export default function Navbar({
   onOpenSettings,
   onOpenHarmonicCircle,
   onOpenAndroidSync,
+  onOpenRehearsalSync,
   onOpenTuner,
   onOpenRecommendations,
   onOpenAnalytics,
@@ -112,6 +116,16 @@ export default function Navbar({
           >
             <Smartphone className="h-4 w-4" />
           </button>
+
+          {onOpenRehearsalSync && (
+            <button
+              onClick={onOpenRehearsalSync}
+              className="rounded-lg border border-amber-500/40 bg-amber-500/15 p-1.5 text-amber-500 transition active:scale-95"
+              title="Modo Ensayo P2P (Banda y Director)"
+            >
+              <Radio className="h-4 w-4 text-amber-500" />
+            </button>
+          )}
 
           {onOpenTuner && (
             <button
@@ -300,6 +314,19 @@ export default function Navbar({
               title="Analítica y Rotación de Alabanzas"
             >
               <BarChart3 className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Sincronización P2P Banda y Director */}
+          {onOpenRehearsalSync && (
+            <button
+              onClick={onOpenRehearsalSync}
+              className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/15 hover:bg-amber-500/25 px-3 py-2 text-xs font-bold text-amber-700 dark:text-amber-300 transition shadow-sm active:scale-95"
+              title="Sincronización P2P de Ensayo entre Músicos y Director"
+            >
+              <Radio className="h-4 w-4 text-amber-500 animate-pulse" />
+              <span className="hidden lg:inline">Ensayo P2P</span>
+              <span className="lg:hidden">P2P</span>
             </button>
           )}
 
