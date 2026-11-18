@@ -7,6 +7,7 @@
 [![Offline First](https://img.shields.io/badge/Offline--First-IndexedDB%20%2B%20Assets-00C853?style=for-the-badge&logo=indexeddb&logoColor=white)](https://developer.mozilla.org/es/docs/Web/API/IndexedDB_API)
 [![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-DSP%20%26%20Stems-FF6F00?style=for-the-badge&logo=audio&logoColor=white)](https://developer.mozilla.org/es/docs/Web/API/Web_Audio_API)
 [![P2P Sync](https://img.shields.io/badge/P2P%20Sync-QR%20%26%20PIN%20Pairing-673AB7?style=for-the-badge&logo=wifi&logoColor=white)](#-sincronización-p2p-en-vivo-modo-director-y-músico)
+[![License: Free Software by Tegra Development](https://img.shields.io/badge/Copyright-2026%20Tegra%20Development-0052CC?style=for-the-badge)](LICENSE)
 
 ---
 
@@ -142,7 +143,18 @@ El script `./scripts/build-standalone-apk.sh`:
 
 ---
 
-## 📄 Licencia
+## ⚖️ Derechos de Autor y Términos Legales (Tegra Development)
 
-Desarrollado para la edificación y excelencia de los ministerios de música y alabanza congregacional.
-Distribución libre para iglesias y bandas cristianas.
+**EKKLESIA** es un software desarrollado y publicado por **Tegra Development**.
+
+* **Titularidad del Software**: Copyright © 2026 **Tegra Development**. Todos los derechos reservados. Todo el código fuente, la arquitectura de sincronización P2P, los algoritmos de procesamiento digital de audio (afinador cromático por autocorrelación, pads ambientales continuos, metrónomo vocal sintetizado y modulaciones armónicas), la interfaz de usuario y las marcas asociadas son propiedad intelectual exclusiva de Tegra Development.
+* **Modelo de Licencia (100% Gratuito)**: Este software se distribuye de forma **gratuita** (Freeware sin costo de suscripción ni licencia) para uso en congregaciones, iglesias, directores de alabanza y músicos. Queda prohibida la venta, reventa o comercialización con fines de lucro del software o sus binarios por terceros ajenos a Tegra Development.
+* **Implicancias sobre Obras Musicales de Terceros (Letras, Acordes y CCLI)**: EKKLESIA opera como una herramienta neutral de gestión y atril digital. Las letras, cifrados de acordes, composiciones y partituras que los usuarios agreguen o consulten son propiedad intelectual exclusiva de sus respectivos autores y sociedades de gestión colectiva (CCLI, ASCAP, BMI, SACM, SGAE). Tegra Development no reclama derechos ni titularidad sobre las canciones de terceros introducidas por los usuarios. Cada congregación es responsable de contar con sus licencias correspondientes (ej. licencias CCLI) para la ejecución pública en sus servicios.
+* **Atribución Bíblica**: Santa Biblia, Reina-Valera 1960 ® © Sociedades Bíblicas en América Latina, 1960. Renovado © Sociedades Bíblicas Unidas, 1988. Utilizado con fines litúrgicos y de estudio.
+* **Garantía y Responsabilidad**: El software se entrega "tal cual" (*as-is*) sin garantías expresas o implícitas de ningún tipo.
+
+Consulta el texto legal íntegro en el archivo [`LICENSE`](LICENSE).
+
+---
+
+**Tegra Development** • *Excelencia en Soluciones Tecnológicas* • 2026

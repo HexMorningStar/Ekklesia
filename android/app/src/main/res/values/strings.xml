@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">EKKLESIA</string>
+    <string name="developer_name">Tegra Development</string>
+    <string name="copyright_notice">© 2026 Tegra Development. Todos los derechos reservados.</string>
 </resources>
